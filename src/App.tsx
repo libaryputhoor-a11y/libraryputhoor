@@ -19,6 +19,8 @@ import Login from "@/pages/auth/Login";
 // Admin Pages
 import Dashboard from "@/pages/admin/Dashboard";
 import ManageBooks from "@/pages/admin/ManageBooks";
+import AddBook from "@/pages/admin/AddBook";
+import EditBook from "@/pages/admin/EditBook";
 import SettingsPage from "@/pages/admin/SettingsPage";
 
 // Components
@@ -54,6 +56,8 @@ const App = () => (
           >
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/books" element={<ManageBooks />} />
+            <Route path="/admin/books/add" element={<AddBook />} />
+            <Route path="/admin/books/edit/:id" element={<EditBook />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
           </Route>
 

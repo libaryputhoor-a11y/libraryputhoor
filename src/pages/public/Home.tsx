@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Grid, List } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ type Book = {
 };
 
 const Home = () => {
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,6 +44,29 @@ const Home = () => {
       return data as Book[];
     },
   });
+
+  // Subscribe to real-time updates for books
+  useEffect(() => {
+    const channel = supabase
+      .channel("books-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "books",
+        },
+        () => {
+          // Invalidate and refetch books when any change occurs
+          queryClient.invalidateQueries({ queryKey: ["public-books"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Extract unique categories and languages for filter chips
   const { categories, languages } = useMemo(() => {

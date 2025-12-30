@@ -19,6 +19,7 @@ const AddBook = () => {
         stock_number: values.stock_number,
         title: values.title,
         author: values.author,
+        publisher: values.publisher,
         language: values.language || null,
         category: values.category || null,
         price: values.price || null,

@@ -25,6 +25,7 @@ const bookSchema = z.object({
   stock_number: z.string().min(1, "Stock number is required").max(50),
   title: z.string().min(1, "Title is required").max(255),
   author: z.string().min(1, "Author is required").max(255),
+  publisher: z.string().min(1, "Publisher is required").max(255),
   language: z.string().optional(),
   category: z.string().optional(),
   price: z.coerce.number().min(0).optional(),
@@ -66,6 +67,7 @@ const BookForm = ({ defaultValues, onSubmit, isSubmitting, submitLabel }: BookFo
       stock_number: "",
       title: "",
       author: "",
+      publisher: "",
       language: "",
       category: "",
       price: undefined,
@@ -115,6 +117,20 @@ const BookForm = ({ defaultValues, onSubmit, isSubmitting, submitLabel }: BookFo
                 <FormLabel>Author *</FormLabel>
                 <FormControl>
                   <Input placeholder="Author name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="publisher"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Publisher *</FormLabel>
+                <FormControl>
+                  <Input placeholder="Publisher name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

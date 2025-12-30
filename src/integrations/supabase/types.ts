@@ -23,6 +23,7 @@ export type Database = {
           id: number
           language: string | null
           price: number | null
+          publisher: string | null
           status: boolean | null
           stock_number: string
           title: string
@@ -35,6 +36,7 @@ export type Database = {
           id?: number
           language?: string | null
           price?: number | null
+          publisher?: string | null
           status?: boolean | null
           stock_number: string
           title: string
@@ -47,6 +49,7 @@ export type Database = {
           id?: number
           language?: string | null
           price?: number | null
+          publisher?: string | null
           status?: boolean | null
           stock_number?: string
           title?: string

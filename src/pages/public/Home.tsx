@@ -13,6 +13,7 @@ type Book = {
   id: number;
   title: string;
   author: string;
+  publisher: string | null;
   category: string | null;
   language: string | null;
   book_type: string | null;
@@ -37,7 +38,7 @@ const Home = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("books")
-        .select("id, title, author, category, language, book_type, status")
+        .select("id, title, author, publisher, category, language, book_type, status")
         .order("title", { ascending: true });
 
       if (error) throw error;
@@ -184,6 +185,7 @@ const Home = () => {
                 key={book.id}
                 title={book.title}
                 author={book.author}
+                publisher={book.publisher}
                 category={book.category}
                 language={book.language}
                 status={book.status}

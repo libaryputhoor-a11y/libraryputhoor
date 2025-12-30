@@ -4,13 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 interface BookCardProps {
   title: string;
   author: string;
+  publisher?: string | null;
   category?: string | null;
   language?: string | null;
   status: boolean | null;
   onClick?: () => void;
 }
 
-const BookCard = ({ title, author, category, language, status, onClick }: BookCardProps) => {
+const BookCard = ({ title, author, publisher, category, language, status, onClick }: BookCardProps) => {
   return (
     <Card
       className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
@@ -28,6 +29,9 @@ const BookCard = ({ title, author, category, language, status, onClick }: BookCa
             {title}
           </h3>
           <p className="text-sm text-muted-foreground line-clamp-1">{author}</p>
+          {publisher && (
+            <p className="text-xs text-muted-foreground/80 line-clamp-1">{publisher}</p>
+          )}
 
           {/* Category & Language */}
           <div className="flex flex-wrap gap-1">

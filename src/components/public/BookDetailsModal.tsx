@@ -10,6 +10,7 @@ interface Book {
   id: number;
   title: string;
   author: string;
+  publisher?: string | null;
   category?: string | null;
   language?: string | null;
   book_type?: string | null;
@@ -57,6 +58,13 @@ const BookDetailsModal = ({ book, open, onOpenChange }: BookDetailsModalProps) =
               <span className="text-muted-foreground">Author</span>
               <span className="font-medium text-foreground">{book.author}</span>
             </div>
+
+            {book.publisher && (
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Publisher</span>
+                <span className="font-medium text-foreground">{book.publisher}</span>
+              </div>
+            )}
 
             {book.category && (
               <div className="flex justify-between py-2 border-b border-border">

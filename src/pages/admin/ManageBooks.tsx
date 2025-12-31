@@ -142,7 +142,8 @@ const ManageBooks = () => {
                       <TableHead>Stock #</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead className="hidden md:table-cell">Author</TableHead>
-                      <TableHead className="hidden lg:table-cell">Category</TableHead>
+                      <TableHead className="hidden lg:table-cell">Publisher</TableHead>
+                      <TableHead className="hidden xl:table-cell">Category</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -154,6 +155,9 @@ const ManageBooks = () => {
                         <TableCell className="max-w-[200px] truncate">{book.title}</TableCell>
                         <TableCell className="hidden md:table-cell">{book.author}</TableCell>
                         <TableCell className="hidden lg:table-cell">
+                          {book.publisher || "-"}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell">
                           {book.category || "-"}
                         </TableCell>
                         <TableCell>

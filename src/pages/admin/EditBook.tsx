@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,8 @@ const EditBook = () => {
           price: values.price || null,
           book_type: values.book_type || null,
           status: values.status,
+          checked_out_date: values.checked_out_date ? format(values.checked_out_date, "yyyy-MM-dd") : null,
+          return_date: values.return_date ? format(values.return_date, "yyyy-MM-dd") : null,
         })
         .eq("id", Number(id));
 
@@ -130,6 +133,8 @@ const EditBook = () => {
                 price: book.price ?? undefined,
                 book_type: book.book_type || "",
                 status: book.status ?? true,
+                checked_out_date: book.checked_out_date ? parseISO(book.checked_out_date) : null,
+                return_date: book.return_date ? parseISO(book.return_date) : null,
               }}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}

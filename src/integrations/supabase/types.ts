@@ -19,11 +19,13 @@ export type Database = {
           author: string
           book_type: string | null
           category: string | null
+          checked_out_date: string | null
           created_at: string
           id: number
           language: string | null
           price: number | null
           publisher: string | null
+          return_date: string | null
           status: boolean | null
           stock_number: string
           title: string
@@ -32,11 +34,13 @@ export type Database = {
           author: string
           book_type?: string | null
           category?: string | null
+          checked_out_date?: string | null
           created_at?: string
           id?: number
           language?: string | null
           price?: number | null
           publisher?: string | null
+          return_date?: string | null
           status?: boolean | null
           stock_number: string
           title: string
@@ -45,11 +49,13 @@ export type Database = {
           author?: string
           book_type?: string | null
           category?: string | null
+          checked_out_date?: string | null
           created_at?: string
           id?: number
           language?: string | null
           price?: number | null
           publisher?: string | null
+          return_date?: string | null
           status?: boolean | null
           stock_number?: string
           title?: string

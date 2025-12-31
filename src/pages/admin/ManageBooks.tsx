@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -191,6 +192,8 @@ const ManageBooks = () => {
                           <SortIcon field="status" />
                         </span>
                       </TableHead>
+                      <TableHead className="hidden xl:table-cell">Checked Out</TableHead>
+                      <TableHead className="hidden xl:table-cell">Return Date</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -216,6 +219,12 @@ const ManageBooks = () => {
                           >
                             {book.status ? "Available" : "Checked Out"}
                           </span>
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell">
+                          {book.checked_out_date ? format(parseISO(book.checked_out_date), "dd MMM yyyy") : "-"}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell">
+                          {book.return_date ? format(parseISO(book.return_date), "dd MMM yyyy") : "-"}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">

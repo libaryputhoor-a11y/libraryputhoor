@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,8 @@ const AddBook = () => {
         price: values.price || null,
         book_type: values.book_type || null,
         status: values.status,
+        checked_out_date: values.checked_out_date ? format(values.checked_out_date, "yyyy-MM-dd") : null,
+        return_date: values.return_date ? format(values.return_date, "yyyy-MM-dd") : null,
       });
 
       if (error) throw error;

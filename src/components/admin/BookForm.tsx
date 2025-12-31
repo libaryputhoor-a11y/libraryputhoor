@@ -51,7 +51,7 @@ const CATEGORIES = [
   "Children",
   "Other",
 ];
-const BOOK_TYPES = ["Hardcover", "Paperback", "Magazine", "Journal", "Reference", "Other"];
+const BOOK_TYPES = ["Normal", "Reference", "EBooks", "Journals", "CD", "Close Reference"];
 
 interface BookFormProps {
   defaultValues?: Partial<BookFormValues>;

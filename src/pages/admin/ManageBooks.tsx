@@ -164,7 +164,7 @@ const ManageBooks = () => {
                           <span
                             className={`px-2 py-1 text-xs font-medium rounded-full ${
                               book.status
-                                ? "bg-accent/10 text-accent"
+                                ? "bg-emerald-500/20 text-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.4)]"
                                 : "bg-destructive/10 text-destructive"
                             }`}
                           >

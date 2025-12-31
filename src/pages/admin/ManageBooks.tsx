@@ -25,19 +25,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
+
+type SortField = "title" | "author" | "created_at" | "status";
+type SortOrder = "asc" | "desc";
 
 const ManageBooks = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["books", searchQuery, currentPage],
+    queryKey: ["books", searchQuery, currentPage, sortField, sortOrder],
     queryFn: async () => {
       let query = supabase
         .from("books")
@@ -53,13 +58,30 @@ const ManageBooks = () => {
       const to = from + ITEMS_PER_PAGE - 1;
 
       const { data: books, error, count } = await query
-        .order("created_at", { ascending: false })
+        .order(sortField, { ascending: sortOrder === "asc" })
         .range(from, to);
 
       if (error) throw error;
       return { books: books || [], totalCount: count || 0 };
     },
   });
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+    setCurrentPage(1);
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
+    return sortOrder === "asc" 
+      ? <ArrowUp className="ml-1 h-3 w-3" /> 
+      : <ArrowDown className="ml-1 h-3 w-3" />;
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -140,11 +162,35 @@ const ManageBooks = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Stock #</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead className="hidden md:table-cell">Author</TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort("title")}
+                      >
+                        <span className="flex items-center">
+                          Title
+                          <SortIcon field="title" />
+                        </span>
+                      </TableHead>
+                      <TableHead 
+                        className="hidden md:table-cell cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort("author")}
+                      >
+                        <span className="flex items-center">
+                          Author
+                          <SortIcon field="author" />
+                        </span>
+                      </TableHead>
                       <TableHead className="hidden lg:table-cell">Publisher</TableHead>
                       <TableHead className="hidden xl:table-cell">Category</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort("status")}
+                      >
+                        <span className="flex items-center">
+                          Status
+                          <SortIcon field="status" />
+                        </span>
+                      </TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>

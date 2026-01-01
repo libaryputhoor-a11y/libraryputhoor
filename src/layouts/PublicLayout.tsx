@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { Home, Search, FolderOpen } from "lucide-react";
+import { Home, Search, FolderOpen, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PublicLayout = () => {
@@ -55,9 +55,10 @@ const PublicLayout = () => {
       <div className="fixed bottom-20 right-4 z-40">
         <Link
           to="/login"
-          className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-muted"
+          className="group flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 px-3 py-2 rounded-md hover:bg-muted/80 hover:shadow-sm"
         >
-          Admin Login
+          <Lock className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+          <span>Admin Login</span>
         </Link>
       </div>
     </div>

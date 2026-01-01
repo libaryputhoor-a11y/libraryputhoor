@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,14 +16,30 @@ const authSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutEndTime, setLockoutEndTime] = useState<number | null>(null);
+  const lockoutTimer = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
+
+  // Cleanup lockout timer on unmount
+  useEffect(() => {
+    return () => {
+      if (lockoutTimer.current) {
+        clearTimeout(lockoutTimer.current);
+      }
+    };
+  }, []);
 
   // Redirect if already logged in as admin
   useEffect(() => {
@@ -36,6 +52,17 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if account is locked
+    if (isLocked) {
+      const remainingTime = lockoutEndTime ? Math.ceil((lockoutEndTime - Date.now()) / 1000 / 60) : 5;
+      toast({
+        title: "Account Temporarily Locked",
+        description: `Too many failed attempts. Please try again in ${remainingTime} minute${remainingTime !== 1 ? 's' : ''}.`,
+        variant: "destructive",
+      });
+      return;
+    }
     
     const validation = authSchema.safeParse({ email, password });
     if (!validation.success) {
@@ -57,16 +84,40 @@ const Login = () => {
     setLoading(false);
 
     if (error) {
-      let errorMessage = error.message;
-      if (error.message.includes("Invalid login credentials")) {
-        errorMessage = "Invalid email or password. Please try again.";
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+
+      if (newAttempts >= MAX_FAILED_ATTEMPTS) {
+        const endTime = Date.now() + LOCKOUT_DURATION_MS;
+        setIsLocked(true);
+        setLockoutEndTime(endTime);
+        
+        lockoutTimer.current = setTimeout(() => {
+          setIsLocked(false);
+          setFailedAttempts(0);
+          setLockoutEndTime(null);
+        }, LOCKOUT_DURATION_MS);
+
+        toast({
+          title: "Account Locked",
+          description: "Too many failed attempts. Please try again in 5 minutes.",
+          variant: "destructive",
+        });
+      } else {
+        const attemptsRemaining = MAX_FAILED_ATTEMPTS - newAttempts;
+        let errorMessage = "Invalid email or password.";
+        if (attemptsRemaining <= 2) {
+          errorMessage += ` ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining.`;
+        }
+        toast({
+          title: "Login Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
-      toast({
-        title: "Login Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
     } else {
+      // Reset failed attempts on successful login
+      setFailedAttempts(0);
       toast({
         title: "Welcome back!",
         description: "You have been logged in successfully.",

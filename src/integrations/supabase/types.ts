@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           id: number
           language: string | null
+          notes: string | null
           price: number | null
           publisher: string | null
           return_date: string | null
@@ -38,6 +39,7 @@ export type Database = {
           created_at?: string
           id?: number
           language?: string | null
+          notes?: string | null
           price?: number | null
           publisher?: string | null
           return_date?: string | null
@@ -53,6 +55,7 @@ export type Database = {
           created_at?: string
           id?: number
           language?: string | null
+          notes?: string | null
           price?: number | null
           publisher?: string | null
           return_date?: string | null

@@ -48,6 +48,7 @@ const EditBook = () => {
           status: values.status,
           checked_out_date: values.checked_out_date ? format(values.checked_out_date, "yyyy-MM-dd") : null,
           return_date: values.return_date ? format(values.return_date, "yyyy-MM-dd") : null,
+          notes: values.notes || null,
         })
         .eq("id", Number(id));
 
@@ -135,10 +136,12 @@ const EditBook = () => {
                 status: book.status ?? true,
                 checked_out_date: book.checked_out_date ? parseISO(book.checked_out_date) : null,
                 return_date: book.return_date ? parseISO(book.return_date) : null,
+                notes: book.notes || "",
               }}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
               submitLabel="Save Changes"
+              isEditMode={true}
             />
           ) : null}
         </CardContent>

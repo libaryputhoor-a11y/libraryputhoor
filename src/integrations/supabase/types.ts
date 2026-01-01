@@ -93,36 +93,30 @@ export type Database = {
           author: string | null
           book_type: string | null
           category: string | null
-          created_at: string | null
           id: number | null
           language: string | null
           publisher: string | null
           status: boolean | null
-          stock_number: string | null
           title: string | null
         }
         Insert: {
           author?: string | null
           book_type?: string | null
           category?: string | null
-          created_at?: string | null
           id?: number | null
           language?: string | null
           publisher?: string | null
           status?: boolean | null
-          stock_number?: string | null
           title?: string | null
         }
         Update: {
           author?: string | null
           book_type?: string | null
           category?: string | null
-          created_at?: string | null
           id?: number | null
           language?: string | null
           publisher?: string | null
           status?: boolean | null
-          stock_number?: string | null
           title?: string | null
         }
         Relationships: []

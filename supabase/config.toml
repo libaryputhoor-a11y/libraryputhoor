@@ -1,1 +1,4 @@
 project_id = "hvsgrmbkmhdtntapuflf"
+
+[functions.invite-admin]
+verify_jwt = true

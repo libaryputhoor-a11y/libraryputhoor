@@ -28,12 +28,12 @@ const Categories = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Fetch category counts
+  // Fetch category counts from public view
   const { data: categoryData, isLoading: isLoadingCategories } = useQuery({
     queryKey: ["category-counts"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("books")
+        .from("books_public")
         .select("category");
 
       if (error) throw error;
@@ -51,12 +51,12 @@ const Categories = () => {
     },
   });
 
-  // Fetch books for selected category
+  // Fetch books for selected category from public view
   const { data: categoryBooks, isLoading: isLoadingBooks } = useQuery({
     queryKey: ["category-books", selectedCategory],
     queryFn: async () => {
       let query = supabase
-        .from("books")
+        .from("books_public")
         .select("id, title, author, category, language, book_type, status")
         .order("title", { ascending: true });
 

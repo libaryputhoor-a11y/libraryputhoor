@@ -55,7 +55,7 @@ const PublicLayout = () => {
       <div className="fixed bottom-20 right-4 z-40">
         <Link
           to="/login"
-          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+          className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-muted"
         >
           Admin Login
         </Link>

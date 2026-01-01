@@ -4,6 +4,7 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -41,6 +42,7 @@ const bookSchema = z.object({
   status: z.boolean().default(true),
   checked_out_date: z.date().nullable().optional(),
   return_date: z.date().nullable().optional(),
+  notes: z.string().max(1000).optional(),
 });
 
 export type BookFormValues = z.infer<typeof bookSchema>;
@@ -88,9 +90,10 @@ interface BookFormProps {
   onSubmit: (values: BookFormValues) => Promise<void>;
   isSubmitting: boolean;
   submitLabel: string;
+  isEditMode?: boolean;
 }
 
-const BookForm = ({ defaultValues, onSubmit, isSubmitting, submitLabel }: BookFormProps) => {
+const BookForm = ({ defaultValues, onSubmit, isSubmitting, submitLabel, isEditMode = false }: BookFormProps) => {
   const form = useForm<BookFormValues>({
     resolver: zodResolver(bookSchema),
     defaultValues: {
@@ -105,6 +108,7 @@ const BookForm = ({ defaultValues, onSubmit, isSubmitting, submitLabel }: BookFo
       status: true,
       checked_out_date: null,
       return_date: null,
+      notes: "",
       ...defaultValues,
     },
   });
@@ -363,6 +367,27 @@ const BookForm = ({ defaultValues, onSubmit, isSubmitting, submitLabel }: BookFo
             )}
           />
         </div>
+
+        {isEditMode && (
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>Admin Notes</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Add notes about this book (only visible to admins)..."
+                    className="min-h-[100px] resize-none"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex justify-end gap-4">
           <Button type="submit" disabled={isSubmitting} className="touch-target">

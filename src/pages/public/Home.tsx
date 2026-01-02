@@ -32,12 +32,12 @@ const Home = () => {
     "all" | "available" | "checked-out"
   >("all");
 
-  // Fetch all books from public view (excludes sensitive columns like price, notes, checkout dates)
+  // Fetch all books (public doesn't see price/stock_number)
   const { data: books, isLoading } = useQuery({
     queryKey: ["public-books"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("books_public")
+        .from("books")
         .select("id, title, author, publisher, category, language, book_type, status")
         .order("title", { ascending: true });
 
@@ -46,7 +46,7 @@ const Home = () => {
     },
   });
 
-  // Subscribe to real-time updates for books (still listen to base table for changes)
+  // Subscribe to real-time updates for books
   useEffect(() => {
     const channel = supabase
       .channel("books-realtime")

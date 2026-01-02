@@ -7,6 +7,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lora&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -16,7 +19,7 @@
   :root {
     /* Deep Blue Primary */
     --primary: 161 93% 30%;
-    --primary-foreground: 151 80% 95%;
+    --primary-foreground: 83 77.9736% 55.4902%;
 
     /* Warm Gray Secondary */
     --secondary: 0 0% 32%;

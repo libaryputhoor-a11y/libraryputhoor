@@ -34,7 +34,7 @@
     --destructive-foreground: 0 85% 97%;
 
     /* Background & Foreground */
-    --background: 210 40% 96.0784%;
+    --background: 0 0% 96%;
     --foreground: 0 0% 9%;
 
     /* Card */
@@ -42,7 +42,7 @@
     --card-foreground: 0 0% 9%;
 
     /* Popover */
-    --popover: 0 0% 89%;
+    --popover: 84 80.531% 44.3137%;
     --popover-foreground: 0 0% 9%;
 
     /* Muted */

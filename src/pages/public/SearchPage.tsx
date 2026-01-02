@@ -60,7 +60,7 @@ const SearchPage = () => {
     queryKey: ["search-books", searchQuery, selectedCategories, selectedLanguage, availabilityFilter, sortBy],
     queryFn: async () => {
       let query = supabase
-        .from("books")
+        .from("books_public")
         .select("id, title, author, category, language, book_type, status");
 
       // Apply search filter
@@ -74,7 +74,7 @@ const SearchPage = () => {
       }
 
       // Apply language filter
-      if (selectedLanguage) {
+      if (selectedLanguage && selectedLanguage !== "all-langs") {
         query = query.eq("language", selectedLanguage);
       }
 

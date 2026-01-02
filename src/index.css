@@ -22,7 +22,7 @@
     --primary-foreground: 151 80% 95%;
 
     /* Warm Gray Secondary */
-    --secondary: 217 32.5843% 17.451%;
+    --secondary: 0 0% 32%;
     --secondary-foreground: 0 0% 98%;
 
     /* Emerald Accent for Available status */
@@ -34,7 +34,7 @@
     --destructive-foreground: 0 85% 97%;
 
     /* Background & Foreground */
-    --background: 0 0% 96%;
+    --background: 210 40% 96.0784%;
     --foreground: 0 0% 9%;
 
     /* Card */

@@ -33,7 +33,7 @@ const Categories = () => {
     queryKey: ["category-counts"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("books")
+        .from("books_public")
         .select("category");
 
       if (error) throw error;
@@ -56,7 +56,7 @@ const Categories = () => {
     queryKey: ["category-books", selectedCategory],
     queryFn: async () => {
       let query = supabase
-        .from("books")
+        .from("books_public")
         .select("id, title, author, category, language, book_type, status")
         .order("title", { ascending: true });
 

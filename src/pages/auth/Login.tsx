@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,10 +122,18 @@ const Login = () => {
                   Signing in...
                 </>
               ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
+              "Sign In"
+                )}
+              </Button>
+              <div className="text-center">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+            </form>
           
           <p className="mt-4 text-center text-sm text-muted-foreground">
             New administrators are added by invitation only.

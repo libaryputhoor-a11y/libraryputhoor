@@ -15,6 +15,8 @@ import Categories from "@/pages/public/Categories";
 
 // Auth Pages
 import Login from "@/pages/auth/Login";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
 
 // Admin Pages
 import Dashboard from "@/pages/admin/Dashboard";
@@ -45,6 +47,8 @@ const App = () => (
 
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected Admin Routes */}
           <Route

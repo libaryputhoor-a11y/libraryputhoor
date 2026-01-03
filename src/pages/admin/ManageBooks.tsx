@@ -221,10 +221,10 @@ const ManageBooks = () => {
                           </span>
                         </TableCell>
                         <TableCell className="hidden xl:table-cell">
-                          {book.checked_out_date ? format(parseISO(book.checked_out_date), "dd MMM yyyy") : "-"}
+                          {!book.status && book.checked_out_date ? format(parseISO(book.checked_out_date), "dd MMM yyyy") : "-"}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell">
-                          {book.return_date ? format(parseISO(book.return_date), "dd MMM yyyy") : "-"}
+                          {!book.status && book.return_date ? format(parseISO(book.return_date), "dd MMM yyyy") : "-"}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">

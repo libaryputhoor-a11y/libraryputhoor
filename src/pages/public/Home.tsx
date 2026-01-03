@@ -37,7 +37,7 @@ const Home = () => {
     queryKey: ["public-books"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("books")
+        .from("books_public")
         .select("id, title, author, publisher, category, language, book_type, status")
         .order("title", { ascending: true });
 

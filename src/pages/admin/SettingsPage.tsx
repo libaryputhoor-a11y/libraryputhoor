@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Lock, User, Mail } from "lucide-react";
+import { Loader2, Lock, Mail, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "next-themes";
 
 const passwordSchema = z.object({
   newPassword: z.string().min(6, "Password must be at least 6 characters"),
@@ -19,33 +20,23 @@ const passwordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-const profileSchema = z.object({
-  displayName: z.string().max(100, "Display name must be less than 100 characters").optional(),
-});
-
 const emailSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
 type PasswordFormValues = z.infer<typeof passwordSchema>;
-type ProfileFormValues = z.infer<typeof profileSchema>;
 type EmailFormValues = z.infer<typeof emailSchema>;
 
 const SettingsPage = () => {
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
-  });
-
-  const profileForm = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: { displayName: "" },
   });
 
   const emailForm = useForm<EmailFormValues>({
@@ -56,17 +47,6 @@ const SettingsPage = () => {
   useEffect(() => {
     if (user) {
       emailForm.setValue("email", user.email || "");
-      // Fetch profile
-      supabase
-        .from("profiles")
-        .select("display_name")
-        .eq("id", user.id)
-        .single()
-        .then(({ data }) => {
-          if (data?.display_name) {
-            profileForm.setValue("displayName", data.display_name);
-          }
-        });
     }
   }, [user]);
 
@@ -81,22 +61,6 @@ const SettingsPage = () => {
       toast({ variant: "destructive", title: "Error", description: error.message || "Failed to update password." });
     } finally {
       setIsPasswordLoading(false);
-    }
-  };
-
-  const onProfileSubmit = async (values: ProfileFormValues) => {
-    if (!user) return;
-    setIsProfileLoading(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({ id: user.id, display_name: values.displayName }, { onConflict: "id" });
-      if (error) throw error;
-      toast({ title: "Profile updated", description: "Your display name has been updated." });
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message || "Failed to update profile." });
-    } finally {
-      setIsProfileLoading(false);
     }
   };
 
@@ -118,37 +82,34 @@ const SettingsPage = () => {
       <h2 className="text-2xl font-bold text-foreground">Settings</h2>
       
       <div className="grid gap-6 max-w-md">
-        {/* Display Name */}
+        {/* Theme */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Display Name
+              {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              Appearance
             </CardTitle>
-            <CardDescription>Update your display name.</CardDescription>
+            <CardDescription>Choose your preferred color theme.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...profileForm}>
-              <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-                <FormField
-                  control={profileForm.control}
-                  name="displayName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Display Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" disabled={isProfileLoading} className="w-full">
-                  {isProfileLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Name
-                </Button>
-              </form>
-            </Form>
+            <div className="flex gap-3">
+              <Button
+                variant={theme === "light" ? "default" : "outline"}
+                onClick={() => setTheme("light")}
+                className="flex-1 gap-2"
+              >
+                <Sun className="h-4 w-4" />
+                Light
+              </Button>
+              <Button
+                variant={theme === "dark" ? "default" : "outline"}
+                onClick={() => setTheme("dark")}
+                className="flex-1 gap-2"
+              >
+                <Moon className="h-4 w-4" />
+                Dark
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

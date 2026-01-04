@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Lock, Mail, Sun, Moon } from "lucide-react";
+import { Loader2, Lock, Mail, Sun, Moon, Monitor } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
 
@@ -92,7 +92,7 @@ const SettingsPage = () => {
             <CardDescription>Choose your preferred color theme.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button
                 variant={theme === "light" ? "default" : "outline"}
                 onClick={() => setTheme("light")}
@@ -104,6 +104,14 @@ const SettingsPage = () => {
               <Button
                 variant={theme === "dark" ? "default" : "outline"}
                 onClick={() => setTheme("dark")}
+                className="flex-1 gap-2"
+              >
+                <Monitor className="h-4 w-4" />
+                System
+              </Button>
+              <Button
+                variant={theme === "system" ? "default" : "outline"}
+                onClick={() => setTheme("system")}
                 className="flex-1 gap-2"
               >
                 <Moon className="h-4 w-4" />

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
@@ -8,9 +9,10 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
+  const { data: isAdmin, isLoading: checkingAdmin } = useIsAdmin(user?.id);
   const location = useLocation();
 
-  if (loading) {
+  if (loading || checkingAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -18,7 +20,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

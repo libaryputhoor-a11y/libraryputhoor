@@ -106,16 +106,16 @@ const SettingsPage = () => {
                 onClick={() => setTheme("dark")}
                 className="flex-1 gap-2"
               >
-                <Monitor className="h-4 w-4" />
-                System
+                <Moon className="h-4 w-4" />
+                Dark
               </Button>
               <Button
                 variant={theme === "system" ? "default" : "outline"}
                 onClick={() => setTheme("system")}
                 className="flex-1 gap-2"
               >
-                <Moon className="h-4 w-4" />
-                Dark
+                <Monitor className="h-4 w-4" />
+                System
               </Button>
             </div>
           </CardContent>

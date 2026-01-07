@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import BookCard from "@/components/public/BookCard";
+import BookCardSkeleton from "@/components/public/BookCardSkeleton";
 import BookDetailsModal from "@/components/public/BookDetailsModal";
 import FilterChips from "@/components/public/FilterChips";
 
@@ -173,8 +174,18 @@ const Home = () => {
               : "space-y-3"
           }
         >
-          {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className={viewMode === "grid" ? "h-72" : "h-20"} />
+          {[...Array(10)].map((_, i) => (
+            viewMode === "grid" ? (
+              <BookCardSkeleton key={i} />
+            ) : (
+              <div key={i} className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="h-6 w-20 rounded-full ml-4" />
+              </div>
+            )
           ))}
         </div>
       ) : filteredBooks.length > 0 ? (

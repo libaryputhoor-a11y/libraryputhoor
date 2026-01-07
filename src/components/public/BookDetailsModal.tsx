@@ -44,7 +44,7 @@ const BookDetailsModal = ({ book, open, onOpenChange }: BookDetailsModalProps) =
             <span
               className={`inline-flex items-center px-4 py-2 text-sm font-semibold rounded-full ${
                 book.status
-                  ? "bg-emerald-500/20 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                  ? "bg-emerald-500/20 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
                   : "bg-destructive/10 text-destructive"
               }`}
             >

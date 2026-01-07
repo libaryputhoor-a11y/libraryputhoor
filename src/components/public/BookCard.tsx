@@ -52,7 +52,7 @@ const BookCard = ({ title, author, publisher, category, language, status, onClic
             <span
               className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${
                 status
-                  ? "bg-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+                  ? "bg-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
                   : "bg-destructive/10 text-destructive"
               }`}
             >

@@ -35,8 +35,8 @@ const BookDetailsModal = ({ book, open, onOpenChange }: BookDetailsModalProps) =
 
         <div className="space-y-4">
           {/* Book Cover Placeholder */}
-          <div className="w-32 h-44 bg-muted rounded-md flex items-center justify-center mx-auto">
-            <BookOpen className="h-16 w-16 text-muted-foreground/50" />
+          <div className="w-32 h-44 bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 rounded-md flex items-center justify-center mx-auto border border-primary/10">
+            <BookOpen className="h-16 w-16 text-primary/40" />
           </div>
 
           {/* Status Badge - Prominent */}

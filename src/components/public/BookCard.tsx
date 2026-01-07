@@ -14,13 +14,13 @@ interface BookCardProps {
 const BookCard = ({ title, author, publisher, category, language, status, onClick }: BookCardProps) => {
   return (
     <Card
-      className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+      className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 group"
       onClick={onClick}
     >
       <CardContent className="p-4">
         {/* Book Cover Placeholder */}
-        <div className="aspect-[3/4] bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 rounded-md mb-3 flex items-center justify-center border border-primary/10">
-          <BookOpen className="h-12 w-12 text-primary/40" />
+        <div className="aspect-[3/4] bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 rounded-md mb-3 flex items-center justify-center border border-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/20">
+          <BookOpen className="h-12 w-12 text-primary/40 transition-transform duration-300 group-hover:scale-110" />
         </div>
 
         {/* Book Info */}

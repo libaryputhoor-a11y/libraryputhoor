@@ -19,8 +19,8 @@ const BookCard = ({ title, author, publisher, category, language, status, onClic
     >
       <CardContent className="p-4">
         {/* Book Cover Placeholder */}
-        <div className="aspect-[3/4] bg-muted rounded-md mb-3 flex items-center justify-center">
-          <BookOpen className="h-12 w-12 text-muted-foreground/50" />
+        <div className="aspect-[3/4] bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 rounded-md mb-3 flex items-center justify-center border border-primary/10">
+          <BookOpen className="h-12 w-12 text-primary/40" />
         </div>
 
         {/* Book Info */}

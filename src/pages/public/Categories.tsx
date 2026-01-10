@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FolderOpen } from "lucide-react";
 import BookCard from "@/components/public/BookCard";
+import BookCardSkeleton from "@/components/public/BookCardSkeleton";
 import BookDetailsModal from "@/components/public/BookDetailsModal";
 
 type Book = {
@@ -109,8 +110,8 @@ const Categories = () => {
 
           {isLoadingBooks ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-72" />
+              {[...Array(10)].map((_, i) => (
+                <BookCardSkeleton key={i} />
               ))}
             </div>
           ) : categoryBooks && categoryBooks.length > 0 ? (

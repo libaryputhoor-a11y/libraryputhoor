@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
+import BookCardSkeleton from "@/components/public/BookCardSkeleton";
 import {
   Select,
   SelectContent,
@@ -246,8 +247,8 @@ const SearchPage = () => {
 
           {isLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {[...Array(8)].map((_, i) => (
-                <Skeleton key={i} className="h-72" />
+              {[...Array(10)].map((_, i) => (
+                <BookCardSkeleton key={i} />
               ))}
             </div>
           ) : books && books.length > 0 ? (

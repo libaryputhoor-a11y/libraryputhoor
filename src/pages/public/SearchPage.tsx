@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
 import BookCardSkeleton from "@/components/public/BookCardSkeleton";
 import {
   Select,
@@ -49,7 +48,7 @@ type Book = {
 
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("title-asc");
@@ -58,7 +57,7 @@ const SearchPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const { data: books, isLoading, refetch } = useQuery({
-    queryKey: ["search-books", searchQuery, selectedCategories, selectedLanguage, availabilityFilter, sortBy],
+    queryKey: ["search-books", searchQuery, selectedCategory, selectedLanguage, availabilityFilter, sortBy],
     queryFn: async () => {
       let query = supabase
         .from("books_public")
@@ -70,8 +69,8 @@ const SearchPage = () => {
       }
 
       // Apply category filter
-      if (selectedCategories.length > 0) {
-        query = query.in("category", selectedCategories);
+      if (selectedCategory && selectedCategory !== "all-cats") {
+        query = query.eq("category", selectedCategory);
       }
 
       // Apply language filter
@@ -103,13 +102,6 @@ const SearchPage = () => {
     refetch();
   };
 
-  const handleCategoryToggle = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);
@@ -118,7 +110,7 @@ const SearchPage = () => {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setSelectedCategories([]);
+    setSelectedCategory("");
     setSelectedLanguage("");
     setAvailabilityFilter("all");
     setSortBy("title-asc");
@@ -151,27 +143,25 @@ const SearchPage = () => {
               </div>
             </div>
 
-            {/* Category Checkboxes */}
-            <div className="space-y-2">
-              <Label>Categories</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {CATEGORIES.map((category) => (
-                  <div key={category} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`cat-${category}`}
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => handleCategoryToggle(category)}
-                    />
-                    <Label htmlFor={`cat-${category}`} className="text-sm font-normal cursor-pointer">
-                      {category}
-                    </Label>
-                  </div>
-                ))}
+            {/* Category & Language & Availability Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all-cats">Any category</SelectItem>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
 
-            {/* Language & Availability Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Language</Label>
                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
@@ -219,6 +209,7 @@ const SearchPage = () => {
                 </Select>
               </div>
             </div>
+
 
             {/* Action Buttons */}
             <div className="flex gap-3">

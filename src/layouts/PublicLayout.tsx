@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Home, Search, FolderOpen, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/public/ThemeToggle";
 
 const PublicLayout = () => {
   const location = useLocation();
@@ -50,6 +51,9 @@ const PublicLayout = () => {
           })}
         </div>
       </nav>
+
+      {/* Theme Toggle */}
+      <ThemeToggle />
 
       {/* Admin Login Link */}
       <div className="fixed bottom-20 right-4 z-40">

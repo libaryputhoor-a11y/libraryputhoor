@@ -17,20 +17,20 @@ const ThemeToggle = () => {
   ];
 
   return (
-    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50">
+    <div className="fixed right-0 top-1/2 -translate-y-1/2 z-50">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             size="icon"
-            className="h-10 w-10 rounded-full bg-card shadow-lg border-border hover:bg-accent"
+            className="h-12 w-6 rounded-l-md rounded-r-none bg-card shadow-lg border-r-0 border-border hover:bg-accent hover:w-8 transition-all duration-200"
           >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent side="left" align="center" className="w-40 p-2">
+        <PopoverContent side="left" align="center" className="w-32 p-2">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground px-2 pb-1">
               Appearance

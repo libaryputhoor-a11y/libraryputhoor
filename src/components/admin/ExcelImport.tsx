@@ -116,6 +116,8 @@ const ExcelImport = () => {
 
         const validationErrors: string[] = [];
         const books: ParsedBook[] = [];
+        const seenStockNumbers = new Map<string, number>();
+        const seenTitles = new Map<string, number>();
 
         jsonData.forEach((row, index) => {
           const mapped = mapColumns(row);
@@ -127,6 +129,23 @@ const ExcelImport = () => {
             return;
           }
 
+          const stockNum = String(mapped.stock_number).trim();
+          const title = String(mapped.title).trim().toLowerCase();
+
+          // Check duplicate stock numbers within the file
+          if (seenStockNumbers.has(stockNum)) {
+            validationErrors.push(`Row ${rowNum}: Duplicate stock number "${stockNum}" (first seen in row ${seenStockNumbers.get(stockNum)})`);
+            return;
+          }
+          seenStockNumbers.set(stockNum, rowNum);
+
+          // Check duplicate titles within the file
+          if (seenTitles.has(title)) {
+            validationErrors.push(`Row ${rowNum}: Duplicate title "${String(mapped.title).trim()}" (first seen in row ${seenTitles.get(title)})`);
+            return;
+          }
+          seenTitles.set(title, rowNum);
+
           const statusVal = mapped.status;
           let status = true;
           if (statusVal !== undefined) {
@@ -135,7 +154,7 @@ const ExcelImport = () => {
           }
 
           books.push({
-            stock_number: String(mapped.stock_number).trim(),
+            stock_number: stockNum,
             title: String(mapped.title).trim(),
             author: String(mapped.author).trim(),
             publisher: String(mapped.publisher).trim(),

@@ -101,7 +101,7 @@ const ExcelImport = () => {
     setParsedBooks([]);
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
         const data = new Uint8Array(evt.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
@@ -114,6 +114,18 @@ const ExcelImport = () => {
           return;
         }
 
+        // Fetch existing stock numbers and titles from DB
+        const { data: existingBooks } = await supabase
+          .from("books")
+          .select("stock_number, title");
+
+        const existingStockNumbers = new Set(
+          (existingBooks || []).map((b) => b.stock_number.trim())
+        );
+        const existingTitles = new Set(
+          (existingBooks || []).map((b) => b.title.trim().toLowerCase())
+        );
+
         const validationErrors: string[] = [];
         const books: ParsedBook[] = [];
         const seenStockNumbers = new Map<string, number>();
@@ -121,7 +133,7 @@ const ExcelImport = () => {
 
         jsonData.forEach((row, index) => {
           const mapped = mapColumns(row);
-          const rowNum = index + 2; // +2 for header + 0-index
+          const rowNum = index + 2;
 
           const missing = REQUIRED_FIELDS.filter((f) => !mapped[f as keyof ParsedBook]?.toString().trim());
           if (missing.length > 0) {
@@ -130,7 +142,8 @@ const ExcelImport = () => {
           }
 
           const stockNum = String(mapped.stock_number).trim();
-          const title = String(mapped.title).trim().toLowerCase();
+          const title = String(mapped.title).trim();
+          const titleLower = title.toLowerCase();
 
           // Check duplicate stock numbers within the file
           if (seenStockNumbers.has(stockNum)) {
@@ -140,11 +153,21 @@ const ExcelImport = () => {
           seenStockNumbers.set(stockNum, rowNum);
 
           // Check duplicate titles within the file
-          if (seenTitles.has(title)) {
-            validationErrors.push(`Row ${rowNum}: Duplicate title "${String(mapped.title).trim()}" (first seen in row ${seenTitles.get(title)})`);
+          if (seenTitles.has(titleLower)) {
+            validationErrors.push(`Row ${rowNum}: Duplicate title "${title}" (first seen in row ${seenTitles.get(titleLower)})`);
             return;
           }
-          seenTitles.set(title, rowNum);
+          seenTitles.set(titleLower, rowNum);
+
+          // Check against existing database records
+          if (existingStockNumbers.has(stockNum)) {
+            validationErrors.push(`Row ${rowNum}: Stock number "${stockNum}" already exists in the library`);
+            return;
+          }
+          if (existingTitles.has(titleLower)) {
+            validationErrors.push(`Row ${rowNum}: Title "${title}" already exists in the library`);
+            return;
+          }
 
           const statusVal = mapped.status;
           let status = true;
@@ -155,7 +178,7 @@ const ExcelImport = () => {
 
           books.push({
             stock_number: stockNum,
-            title: String(mapped.title).trim(),
+            title,
             author: String(mapped.author).trim(),
             publisher: String(mapped.publisher).trim(),
             language: mapped.language ? String(mapped.language).trim() : undefined,

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import ExcelImport from "@/components/admin/ExcelImport";
 import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
@@ -116,12 +117,15 @@ const ManageBooks = () => {
             {data?.totalCount ?? 0} books in the library
           </p>
         </div>
-        <Link to="/admin/books/add">
-          <Button className="touch-target">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Book
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <ExcelImport />
+          <Link to="/admin/books/add">
+            <Button className="touch-target">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Book
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}

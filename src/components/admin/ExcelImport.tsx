@@ -190,12 +190,10 @@ const ExcelImport = () => {
           });
         });
 
-        if (validationErrors.length > 0 && books.length === 0) {
-          setErrors(validationErrors);
+        setErrors(validationErrors);
+        if (books.length === 0 && validationErrors.length > 0) {
           return;
         }
-
-        setErrors(validationErrors);
         setParsedBooks(books);
       } catch {
         setErrors(["Failed to parse the file. Please ensure it's a valid Excel or CSV file."]);

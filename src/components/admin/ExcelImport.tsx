@@ -123,14 +123,10 @@ const ExcelImport = () => {
         const existingStockNumbers = new Set(
           (existingBooks || []).map((b) => b.stock_number.trim())
         );
-        const existingTitles = new Set(
-          (existingBooks || []).map((b) => b.title.trim().toLowerCase())
-        );
 
         const validationErrors: string[] = [];
         const books: ParsedBook[] = [];
         const seenStockNumbers = new Map<string, number>();
-        const seenTitles = new Map<string, number>();
 
         jsonData.forEach((row, index) => {
           const mapped = mapColumns(row);
@@ -144,7 +140,6 @@ const ExcelImport = () => {
 
           const stockNum = String(mapped.stock_number).trim();
           const title = String(mapped.title).trim();
-          const titleLower = title.toLowerCase();
 
           // Check duplicate stock numbers within the file
           if (seenStockNumbers.has(stockNum)) {
@@ -153,20 +148,9 @@ const ExcelImport = () => {
           }
           seenStockNumbers.set(stockNum, rowNum);
 
-          // Check duplicate titles within the file
-          if (seenTitles.has(titleLower)) {
-            validationErrors.push(`Row ${rowNum}: Duplicate title "${title}" (first seen in row ${seenTitles.get(titleLower)})`);
-            return;
-          }
-          seenTitles.set(titleLower, rowNum);
-
           // Check against existing database records
           if (existingStockNumbers.has(stockNum)) {
             validationErrors.push(`Row ${rowNum}: Stock number "${stockNum}" already exists in the library`);
-            return;
-          }
-          if (existingTitles.has(titleLower)) {
-            validationErrors.push(`Row ${rowNum}: Title "${title}" already exists in the library`);
             return;
           }
 

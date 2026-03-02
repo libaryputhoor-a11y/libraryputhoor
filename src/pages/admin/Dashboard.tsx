@@ -17,23 +17,14 @@ const Dashboard = () => {
   const { data: stats, isLoading } = useQuery<BookStats>({
     queryKey: ["book-stats"],
     queryFn: async () => {
-      // Get all books
-      const { data: books, error } = await supabase
-        .from("books")
-        .select("status, category");
-
+      const { data, error } = await supabase.rpc('get_book_stats');
       if (error) throw error;
-
-      const total = books?.length || 0;
-      const available = books?.filter((b) => b.status === true).length || 0;
-      const checkedOut = books?.filter((b) => b.status === false).length || 0;
-      const uniqueCategories = new Set(books?.map((b) => b.category).filter(Boolean));
-      
+      const result = data as { total: number; available: number; checked_out: number; categories: number };
       return {
-        total,
-        available,
-        checkedOut,
-        categories: uniqueCategories.size,
+        total: result.total,
+        available: result.available,
+        checkedOut: result.checked_out,
+        categories: result.categories,
       };
     },
   });

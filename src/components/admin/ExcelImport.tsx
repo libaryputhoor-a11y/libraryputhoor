@@ -47,6 +47,7 @@ const COLUMN_MAP: Record<string, string> = {
   "stock #": "stock_number",
   "stockno": "stock_number",
   "title": "title",
+  "tittle": "title",
   "book title": "title",
   "author": "author",
   "author name": "author",

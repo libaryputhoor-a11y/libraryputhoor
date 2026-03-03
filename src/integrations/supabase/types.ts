@@ -172,6 +172,7 @@ export type Database = {
     }
     Functions: {
       get_book_stats: { Args: never; Returns: Json }
+      get_category_counts: { Args: never; Returns: Json }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {

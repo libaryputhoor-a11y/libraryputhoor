@@ -1,13 +1,14 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FolderOpen } from "lucide-react";
+import { ArrowLeft, FolderOpen, Loader2 } from "lucide-react";
 import BookCard from "@/components/public/BookCard";
 import BookCardSkeleton from "@/components/public/BookCardSkeleton";
 import BookDetailsModal from "@/components/public/BookDetailsModal";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 type Book = {
   id: number;
@@ -24,42 +25,44 @@ type CategoryCount = {
   count: number;
 };
 
+const PAGE_SIZE = 20;
+
 const Categories = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Fetch category counts
+  // Fetch category counts using RPC (no row limit)
   const { data: categoryData, isLoading: isLoadingCategories } = useQuery({
     queryKey: ["category-counts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("books_public")
-        .select("category");
-
+      const { data, error } = await supabase.rpc("get_category_counts");
       if (error) throw error;
-
-      // Count books per category
-      const counts: Record<string, number> = {};
-      data.forEach((book) => {
-        const cat = book.category || "Uncategorized";
-        counts[cat] = (counts[cat] || 0) + 1;
-      });
-
-      return Object.entries(counts)
-        .map(([category, count]) => ({ category, count }))
-        .sort((a, b) => b.count - a.count) as CategoryCount[];
+      return data as CategoryCount[];
     },
   });
 
-  // Fetch books for selected category
-  const { data: categoryBooks, isLoading: isLoadingBooks } = useQuery({
+  // Total books from category counts
+  const totalBooks = useMemo(() => {
+    if (!categoryData) return 0;
+    return categoryData.reduce((sum, c) => sum + c.count, 0);
+  }, [categoryData]);
+
+  // Fetch books for selected category with infinite scroll
+  const {
+    data: categoryBooksData,
+    isLoading: isLoadingBooks,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
     queryKey: ["category-books", selectedCategory],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from("books_public")
         .select("id, title, author, category, language, book_type, status")
-        .order("title", { ascending: true });
+        .order("title", { ascending: true })
+        .range(pageParam, pageParam + PAGE_SIZE - 1);
 
       if (selectedCategory === "Uncategorized") {
         query = query.is("category", null);
@@ -69,10 +72,39 @@ const Categories = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as Book[];
+      return {
+        books: data as Book[],
+        nextPage: data.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
+      };
     },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
     enabled: !!selectedCategory,
   });
+
+  const categoryBooks = useMemo(() => {
+    if (!categoryBooksData?.pages) return [];
+    return categoryBooksData.pages.flatMap((page) => page.books);
+  }, [categoryBooksData]);
+
+  // Get the expected count for selected category
+  const selectedCategoryCount = useMemo(() => {
+    if (!selectedCategory || !categoryData) return 0;
+    return categoryData.find((c) => c.category === selectedCategory)?.count ?? 0;
+  }, [selectedCategory, categoryData]);
+
+  // Intersection observer for infinite scroll
+  const { ref: loadMoreRef, isIntersecting } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: "100px",
+    enabled: hasNextPage && !isFetchingNextPage,
+  });
+
+  useEffect(() => {
+    if (isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);
@@ -90,7 +122,6 @@ const Categories = () => {
   return (
     <div className="space-y-6">
       {selectedCategory ? (
-        // Books in selected category
         <>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={handleBack}>
@@ -99,11 +130,7 @@ const Categories = () => {
             <div>
               <h2 className="text-2xl font-bold text-foreground">{selectedCategory}</h2>
               <p className="text-muted-foreground">
-                {isLoadingBooks ? (
-                  <Skeleton className="h-4 w-20 inline-block" />
-                ) : (
-                  `${categoryBooks?.length || 0} books`
-                )}
+                {selectedCategoryCount} book{selectedCategoryCount !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
@@ -114,20 +141,35 @@ const Categories = () => {
                 <BookCardSkeleton key={i} />
               ))}
             </div>
-          ) : categoryBooks && categoryBooks.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {categoryBooks.map((book) => (
-                <BookCard
-                  key={book.id}
-                  title={book.title}
-                  author={book.author}
-                  category={book.category}
-                  language={book.language}
-                  status={book.status}
-                  onClick={() => handleBookClick(book)}
-                />
-              ))}
-            </div>
+          ) : categoryBooks.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {categoryBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    title={book.title}
+                    author={book.author}
+                    category={book.category}
+                    language={book.language}
+                    status={book.status}
+                    onClick={() => handleBookClick(book)}
+                  />
+                ))}
+              </div>
+
+              {/* Infinite scroll trigger */}
+              <div ref={loadMoreRef} className="py-4 flex justify-center">
+                {isFetchingNextPage && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm">Loading more books...</span>
+                  </div>
+                )}
+                {!hasNextPage && categoryBooks.length > PAGE_SIZE && (
+                  <p className="text-sm text-muted-foreground">All books in this category loaded</p>
+                )}
+              </div>
+            </>
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No books in this category.</p>
@@ -135,10 +177,13 @@ const Categories = () => {
           )}
         </>
       ) : (
-        // Category grid
         <>
-          <h2 className="text-2xl font-bold text-foreground">Categories</h2>
-          <p className="text-muted-foreground">Browse books by category</p>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Categories</h2>
+            <p className="text-muted-foreground">
+              Browse books by category · {totalBooks} books total
+            </p>
+          </div>
 
           {isLoadingCategories ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -176,7 +221,6 @@ const Categories = () => {
         </>
       )}
 
-      {/* Book Details Modal */}
       <BookDetailsModal book={selectedBook} open={modalOpen} onOpenChange={setModalOpen} />
     </div>
   );

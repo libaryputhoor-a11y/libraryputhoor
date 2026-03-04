@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BookCard from "@/components/public/BookCard";
 import BookDetailsModal from "@/components/public/BookDetailsModal";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 const CATEGORIES = [
   "Fiction",
@@ -46,6 +47,8 @@ type Book = {
   status: boolean | null;
 };
 
+const PAGE_SIZE = 20;
+
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -56,52 +59,91 @@ const SearchPage = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const { data: books, isLoading, refetch } = useQuery({
-    queryKey: ["search-books", searchQuery, selectedCategory, selectedLanguage, availabilityFilter, sortBy],
-    queryFn: async () => {
+  // Snapshot filters on search to avoid refetching on every filter change
+  const [activeFilters, setActiveFilters] = useState({
+    searchQuery: "",
+    selectedCategory: "",
+    selectedLanguage: "",
+    availabilityFilter: "all",
+    sortBy: "title-asc",
+  });
+
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["search-books", activeFilters],
+    queryFn: async ({ pageParam = 0 }) => {
+      const [field, direction] = activeFilters.sortBy.split("-");
+
       let query = supabase
         .from("books_public")
-        .select("id, title, author, category, language, book_type, status");
+        .select("id, title, author, category, language, book_type, status")
+        .order(field, { ascending: direction === "asc" })
+        .range(pageParam, pageParam + PAGE_SIZE - 1);
 
-      // Apply search filter
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%`);
+      if (activeFilters.searchQuery) {
+        query = query.or(`title.ilike.%${activeFilters.searchQuery}%,author.ilike.%${activeFilters.searchQuery}%`);
       }
 
-      // Apply category filter
-      if (selectedCategory && selectedCategory !== "all-cats") {
-        query = query.eq("category", selectedCategory);
+      if (activeFilters.selectedCategory && activeFilters.selectedCategory !== "all-cats") {
+        query = query.eq("category", activeFilters.selectedCategory);
       }
 
-      // Apply language filter
-      if (selectedLanguage) {
-        query = query.eq("language", selectedLanguage);
+      if (activeFilters.selectedLanguage && activeFilters.selectedLanguage !== "all-langs") {
+        query = query.eq("language", activeFilters.selectedLanguage);
       }
 
-      // Apply availability filter
-      if (availabilityFilter === "available") {
+      if (activeFilters.availabilityFilter === "available") {
         query = query.eq("status", true);
-      } else if (availabilityFilter === "checked-out") {
+      } else if (activeFilters.availabilityFilter === "checked-out") {
         query = query.eq("status", false);
       }
 
-      // Apply sorting
-      const [field, direction] = sortBy.split("-");
-      query = query.order(field, { ascending: direction === "asc" });
-
       const { data, error } = await query;
       if (error) throw error;
-      return data as Book[];
+      return {
+        books: data as Book[],
+        nextPage: data.length === PAGE_SIZE ? pageParam + PAGE_SIZE : undefined,
+      };
     },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
     enabled: hasSearched,
   });
 
+  const allBooks = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page) => page.books);
+  }, [data]);
+
+  // Intersection observer for infinite scroll
+  const { ref: loadMoreRef, isIntersecting } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: "100px",
+    enabled: hasNextPage && !isFetchingNextPage,
+  });
+
+  useEffect(() => {
+    if (isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setActiveFilters({
+      searchQuery,
+      selectedCategory,
+      selectedLanguage,
+      availabilityFilter,
+      sortBy,
+    });
     setHasSearched(true);
-    refetch();
   };
-
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);
@@ -204,12 +246,10 @@ const SearchPage = () => {
                     <SelectItem value="title-desc">Title (Z-A)</SelectItem>
                     <SelectItem value="author-asc">Author (A-Z)</SelectItem>
                     <SelectItem value="author-desc">Author (Z-A)</SelectItem>
-                    <SelectItem value="created_at-desc">Recently Added</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
 
             {/* Action Buttons */}
             <div className="flex gap-3">
@@ -232,7 +272,7 @@ const SearchPage = () => {
             {isLoading ? (
               <Skeleton className="h-4 w-24 inline-block" />
             ) : (
-              `${books?.length || 0} book${(books?.length || 0) !== 1 ? "s" : ""} found`
+              `${allBooks.length} book${allBooks.length !== 1 ? "s" : ""} found${hasNextPage ? "..." : ""}`
             )}
           </p>
 
@@ -242,20 +282,35 @@ const SearchPage = () => {
                 <BookCardSkeleton key={i} />
               ))}
             </div>
-          ) : books && books.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {books.map((book) => (
-                <BookCard
-                  key={book.id}
-                  title={book.title}
-                  author={book.author}
-                  category={book.category}
-                  language={book.language}
-                  status={book.status}
-                  onClick={() => handleBookClick(book)}
-                />
-              ))}
-            </div>
+          ) : allBooks.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {allBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    title={book.title}
+                    author={book.author}
+                    category={book.category}
+                    language={book.language}
+                    status={book.status}
+                    onClick={() => handleBookClick(book)}
+                  />
+                ))}
+              </div>
+
+              {/* Infinite scroll trigger */}
+              <div ref={loadMoreRef} className="py-4 flex justify-center">
+                {isFetchingNextPage && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm">Loading more books...</span>
+                  </div>
+                )}
+                {!hasNextPage && allBooks.length > PAGE_SIZE && (
+                  <p className="text-sm text-muted-foreground">All matching books loaded</p>
+                )}
+              </div>
+            </>
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No books match your search criteria.</p>

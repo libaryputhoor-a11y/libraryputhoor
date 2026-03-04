@@ -115,14 +115,22 @@ const ExcelImport = () => {
           return;
         }
 
-        // Fetch existing stock numbers and titles from DB
-        const { data: existingBooks } = await supabase
-          .from("books")
-          .select("stock_number, title");
+        // Fetch ALL existing stock numbers from DB (paginated to bypass 1000-row limit)
+        const allStockNumbers: string[] = [];
+        let from = 0;
+        const pageSize = 1000;
+        while (true) {
+          const { data: page } = await supabase
+            .from("books")
+            .select("stock_number")
+            .range(from, from + pageSize - 1);
+          if (!page || page.length === 0) break;
+          allStockNumbers.push(...page.map((b) => b.stock_number.trim()));
+          if (page.length < pageSize) break;
+          from += pageSize;
+        }
 
-        const existingStockNumbers = new Set(
-          (existingBooks || []).map((b) => b.stock_number.trim())
-        );
+        const existingStockNumbers = new Set(allStockNumbers);
 
         const validationErrors: string[] = [];
         const books: ParsedBook[] = [];

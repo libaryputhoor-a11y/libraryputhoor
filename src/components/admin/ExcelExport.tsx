@@ -2,16 +2,49 @@ import { useState } from "react";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const ExcelExport = () => {
   const [isExporting, setIsExporting] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [isLoadingCount, setIsLoadingCount] = useState(false);
+
+  const fetchCount = async () => {
+    setIsLoadingCount(true);
+    try {
+      const { data, error } = await supabase.rpc("get_book_stats");
+      if (error) throw error;
+      const stats = data as { total: number };
+      setTotalCount(stats.total);
+    } catch {
+      setTotalCount(null);
+    } finally {
+      setIsLoadingCount(false);
+    }
+  };
+
+  const handleOpenChange = (value: boolean) => {
+    setOpen(value);
+    if (value) fetchCount();
+  };
 
   const handleExport = async () => {
+    setOpen(false);
     setIsExporting(true);
     try {
-      // Fetch all books in batches to bypass 1000-row limit
       const allBooks: Record<string, unknown>[] = [];
       let from = 0;
       const pageSize = 1000;
@@ -67,10 +100,37 @@ const ExcelExport = () => {
   };
 
   return (
-    <Button variant="outline" className="touch-target" onClick={handleExport} disabled={isExporting}>
-      {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-      Export Excel
-    </Button>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" className="touch-target" disabled={isExporting}>
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          Export Excel
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Export All Books</AlertDialogTitle>
+          <AlertDialogDescription>
+            {isLoadingCount ? (
+              "Counting books..."
+            ) : totalCount !== null ? (
+              <>
+                This will export <span className="font-semibold text-foreground">{totalCount.toLocaleString()}</span> book{totalCount !== 1 ? "s" : ""} as an Excel file. Do you want to continue?
+              </>
+            ) : (
+              "This will export all books as an Excel file. Do you want to continue?"
+            )}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleExport} disabled={isLoadingCount}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

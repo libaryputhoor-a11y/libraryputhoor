@@ -28,6 +28,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import ExcelImport from "@/components/admin/ExcelImport";
+import ExcelExport from "@/components/admin/ExcelExport";
 import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
@@ -117,7 +118,8 @@ const ManageBooks = () => {
             {data?.totalCount ?? 0} books in the library
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ExcelExport />
           <ExcelImport />
           <Link to="/admin/books/add">
             <Button className="touch-target">

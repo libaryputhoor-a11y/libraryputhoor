@@ -40,6 +40,8 @@ const Categories = () => {
       if (error) throw error;
       return data as CategoryCount[];
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // Total books from category counts

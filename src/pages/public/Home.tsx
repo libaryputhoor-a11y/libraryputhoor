@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useDeferredValue } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Grid, List, Loader2 } from "lucide-react";
@@ -27,6 +27,7 @@ const PAGE_SIZE = 20;
 const Home = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearch = useDeferredValue(searchQuery);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -44,7 +45,7 @@ const Home = () => {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["public-books", searchQuery, selectedCategory, selectedLanguage, selectedAvailability],
+    queryKey: ["public-books", deferredSearch, selectedCategory, selectedLanguage, selectedAvailability],
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from("books_public")
@@ -52,22 +53,18 @@ const Home = () => {
         .order("title", { ascending: true })
         .range(pageParam, pageParam + PAGE_SIZE - 1);
 
-      // Apply search filter
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%`);
+      if (deferredSearch) {
+        query = query.or(`title.ilike.%${deferredSearch}%,author.ilike.%${deferredSearch}%`);
       }
 
-      // Apply category filter
       if (selectedCategory) {
         query = query.eq("category", selectedCategory);
       }
 
-      // Apply language filter
       if (selectedLanguage) {
         query = query.eq("language", selectedLanguage);
       }
 
-      // Apply availability filter
       if (selectedAvailability === "available") {
         query = query.eq("status", true);
       } else if (selectedAvailability === "checked-out") {
@@ -84,6 +81,8 @@ const Home = () => {
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // Intersection observer for infinite scroll
